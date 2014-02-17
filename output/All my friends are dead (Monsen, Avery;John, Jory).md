@@ -1,0 +1,2 @@
+>Sometimes I feel alone. Some days are long and hard. But when I look out into the world, I am struck by the impossible beauty of it all. Those billions of magnificent accidents that led us to where we are today, that led us to paper planes and nautilus shells and the tiny, crooked smiles of children. When I think about all the small perfections of the world, I have faith that my time will come. I have faith that someday, a warm light will flood over me and I will find peace.
+-At Kindle page:78-81
