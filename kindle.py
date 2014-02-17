@@ -64,7 +64,7 @@ def export_txt(clips):
             lines.append(clips[book][pos])
             print(clips[book][pos])
         
-        filename = os.path.join(OUTPUT_DIR, "%s.txt" % book)
+        filename = os.path.join(OUTPUT_DIR, "%s.md" % book)
         with open(filename, 'w') as f:
             f.write('\n\n-----------------\n\n'.join(lines))
 
@@ -77,6 +77,22 @@ def load_clips():
             return msgpack.unpack(f,encoding='utf-8')
     except IOError:
         return {}
+
+def get_note_format(clip):
+    """Note的表现样式，与markdown结合"""
+    position = clip['position']
+    highlight = clip['content']
+    note = clip['note']
+    format = ">" + highlight + "\nNote:**"+note +"**\n-At Kindle page:" + position
+    return format
+
+def get_highlight_format(clip):
+    """Highlight的表现样式，与markdown相结合""" 
+    position = clip['position']
+    highlight = clip['content']
+    format = ">" + highlight + "\n-At Kindle page:" + position
+    return format
+
 
 def main():
     clips = collections.defaultdict(dict)
@@ -94,10 +110,10 @@ def main():
             continue
         if get_type(section) == 1:
             clip = get_clip(section)
-            clips[clip['book']][clip['position']] = clip['content']
+            clips[clip['book']][clip['position']] = get_highlight_format(clip)
         else:
             clip = get_note(sections[i+1], section)
-            clips[clip['book']][clip['position']] = clip['content'] + "\n-----\n" + clip['note']
+            clips[clip['book']][clip['position']] = get_note_format(clip)
             nextpass = 1
             print(clips[clip['book']][clip['position']]) 
 

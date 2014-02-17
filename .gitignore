@@ -1,4 +1,5 @@
 *.pyc
+*.md
 *.txt
 *.swp
 clips.msgpack
