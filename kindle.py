@@ -18,17 +18,34 @@ def get_sections(filename):
 
 def get_clip(section):
     clip = {}
-
     lines = [l for l in section.split('\n') if l]
-    if len(lines) != 3:
-        return
-
     position = re.findall(r'[\d]+-[\d]+', lines[1])
     clip['position'] = position[0]
     clip['book'] = lines[0]
     clip['content'] = lines[2]
 
     return clip
+
+def get_note(high_section, note_section):
+    notelines = [l for l in note_section.split('\n') if l]
+    note = notelines[2]
+
+    clip = get_clip(high_section)
+    clip['note'] = note
+    print(clip)
+    return clip
+    
+
+def get_type(section):
+    """设BookMark为0，Highlight为1，Note为2"""
+    lines = [l for l in section.split('\n') if l]
+    if len(lines) != 3:
+        return 0
+
+    if re.findall(r'[\d]+-[\d]+', lines[1]):
+        return 1
+    else:
+        return 2
 
 def save_clips(clips):
     """
@@ -45,10 +62,11 @@ def export_txt(clips):
         lines = []
         for pos in sorted(clips[book]):
             lines.append(clips[book][pos])
+            print(clips[book][pos])
         
         filename = os.path.join(OUTPUT_DIR, "%s.txt" % book)
         with open(filename, 'w') as f:
-            f.write('\n\n-----\n\n'.join(lines))
+            f.write('\n\n-----------------\n\n'.join(lines))
 
 def load_clips():
     """
@@ -65,10 +83,23 @@ def main():
     clips.update(load_clips())
 
     sections = get_sections(FILE_NAME)
-    for section in sections:
-        clip = get_clip(section)
-        if clip:
+    nextpass = 0
+    for i,section in enumerate(sections):
+        if nextpass:
+            nextpass = 0
+            continue
+
+        print(get_type(section))
+        if get_type(section) == 0:
+            continue
+        if get_type(section) == 1:
+            clip = get_clip(section)
             clips[clip['book']][clip['position']] = clip['content']
+        else:
+            clip = get_note(sections[i+1], section)
+            clips[clip['book']][clip['position']] = clip['content'] + "\n-----\n" + clip['note']
+            nextpass = 1
+            print(clips[clip['book']][clip['position']]) 
 
     save_clips(clips)
     export_txt(clips)
