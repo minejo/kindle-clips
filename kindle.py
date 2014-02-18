@@ -132,6 +132,11 @@ def get_highlight_format(clip,type):
         format = highlight + "\n-At Kindle page:" + position + "\n\n------------------\n\n"
     return format
 
+def help():
+    print("""welcome to use kindle-clips.
+       -m --markdown 导出markdown格式的书摘
+       -f --fortune  导出fortune格式的书摘
+       默认导出txt文本格式。""")
 
 def main(argv):
     try:
