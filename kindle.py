@@ -4,9 +4,13 @@ import re
 import collections
 import os
 import msgpack
+import sys
+import getopt
 
 BOUNDARY = "==========\n"
-OUTPUT_DIR = "output"
+OUTPUT_DIR = "clip"
+FORTUNE_DIR = "fortune"
+FORTUNE_FILE = "kindle-fortune"
 FILE_NAME = "My Clippings.txt"
 DATA_FILE = "clips.msgpack"
 
@@ -65,7 +69,7 @@ def save_clips(clips):
     with open(DATA_FILE, 'wb') as f:
         f.write(msgpack.packb(clips))
 
-def export_txt(clips):
+def export_txt(clips,type):
     """
     Export each book's clipping to a single markdown file
     """
@@ -74,9 +78,22 @@ def export_txt(clips):
         for pos in sorted(clips[book]):
             lines.append(clips[book][pos])
         
-        filename = os.path.join(OUTPUT_DIR, "%s.md" % book)
-        with open(filename, 'w') as f:
-            f.write('\n\n-----------------\n\n'.join(lines))
+        if type == "markdown":
+            filename = os.path.join(OUTPUT_DIR, "%s.md" % book)
+        elif type == "common":
+            filename = os.path.join(OUTPUT_DIR, "%s.txt" % book)
+        elif type == "fortune":
+            filename = os.path.join(FORTUNE_DIR, FORTUNE_FILE)
+
+        if type in ("markdown","common"):
+            with open(filename, 'w') as f:
+                f.write(''.join(lines))
+        elif type == "fortune":
+            with open(filename, 'a') as f:
+                f.write(''.join(lines))
+
+    print("Done! Go to the output directory to checkout the clipping files.^.^")
+
 
 def load_clips():
     """
@@ -88,23 +105,54 @@ def load_clips():
     except IOError:
         return {}
 
-def get_note_format(clip):
+def get_note_format(clip,type):
     """Note的表现样式，与markdown结合"""
     position = clip['position']
     highlight = clip['content']
     note = clip['note']
-    format = ">" + highlight + "\nNote:**"+note +"**\n-At Kindle page:" + position
+    book = clip['book']
+    if type == "markdown":
+        format = ">" + highlight + "\nNote:**"+note +"**\n-At Kindle page:" + position + "\n\n--------------\n\n"
+    elif type == "fortune":
+        format = highlight + "\nNote: " + note + "\n-" + book + "\n%\n"
+    elif type == "common":
+        format = highlight + "\nNote: " + note + "\n-At Kindle page:" + position + "\n\n------------------\n\n"
     return format
 
-def get_highlight_format(clip):
+def get_highlight_format(clip,type):
     """Highlight的表现样式，与markdown相结合""" 
     position = clip['position']
     highlight = clip['content']
-    format = ">" + highlight + "\n-At Kindle page:" + position
+    book = clip['book']
+    if type == "markdown":
+        format = ">" + highlight + "\n-At Kindle page:" + position +"\n\n------------------\n\n"
+    elif type == "fortune":
+        format = highlight + "\n-" + book + "\n%\n"
+    elif type == "common":
+        format = highlight + "\n-At Kindle page:" + position + "\n\n------------------\n\n"
     return format
 
 
-def main():
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv, "hfm",["help","fortune","markdown"])
+    except getopt.GetoptError:
+        print("参数出错，-h查看参数使用")
+        sys.exit(2)
+
+    type = "common"
+
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            help()
+            sys.exit()
+        elif opt in ("-f", "--fortune"):
+            type = "fortune"
+            os.remove(os.path.join(FORTUNE_DIR, FORTUNE_FILE))
+        elif opt in ("-m", "--markdown"):
+            type = "markdown"
+
+
     clips = collections.defaultdict(dict)
     clips.update(load_clips())
 
@@ -119,20 +167,19 @@ def main():
             continue
         if get_type(section) == 1:
             clip = get_highlight(section)
-            clips[clip['book']][clip['position']] = get_highlight_format(clip)
+            clips[clip['book']][clip['position']] = get_highlight_format(clip,type)
         else:
             if get_type(section) == 2:
                 clip = get_note(sections[i+1], section)
-                clips[clip['book']][clip['position']] = get_note_format(clip)
+                clips[clip['book']][clip['position']] = get_note_format(clip,type)
                 nextpass = 1
             else:
                 clip = get_clip(section)
-                clips[clip['book']][clip['position']] = get_highlight_format(clip)
+                clips[clip['book']][clip['position']] = get_highlight_format(clip,type)
 
 
     save_clips(clips)
-    export_txt(clips)
-    print("Done! Go to the output directory to checkout the clipping files.^.^")
+    export_txt(clips,type)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
