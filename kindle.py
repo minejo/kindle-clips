@@ -136,6 +136,7 @@ def help():
     print("""welcome to use kindle-clips.
        -m --markdown 导出markdown格式的书摘
        -f --fortune  导出fortune格式的书摘
+       -i file 从制定文件导入书摘
        默认导出txt文本格式。""")
     return
 
@@ -170,8 +171,6 @@ def main(argv):
         elif opt == "-i":
             if arg:
                 FILE_NAME = arg
-                print(FILE_NAME)
-            print(arg)
 
 
     clips = collections.defaultdict(dict)
