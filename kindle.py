@@ -137,6 +137,15 @@ def help():
        -m --markdown 导出markdown格式的书摘
        -f --fortune  导出fortune格式的书摘
        默认导出txt文本格式。""")
+    return
+
+def checkdirectory():
+    if not os.path.exists(FORTUNE_DIR):
+        os.mkdir(FORTUNE_DIR)
+
+    if not os.path.exists(OUTPUT_DIR):
+        os.mkdir(OUTPUT_DIR)
+    return 
 
 def main(argv):
     try:
@@ -146,6 +155,7 @@ def main(argv):
         sys.exit(2)
 
     type = "common"
+    checkdirectory()
 
     for opt, arg in opts:
         if opt in ("-h", "--help"):
