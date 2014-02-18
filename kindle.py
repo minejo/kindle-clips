@@ -140,7 +140,7 @@ def help():
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hfm",["help","fortune","markdown"])
+        opts, args = getopt.getopt(argv, "hfmi",["help","fortune","markdown"])
     except getopt.GetoptError:
         print("参数出错，-h查看参数使用")
         sys.exit(2)
@@ -156,6 +156,8 @@ def main(argv):
             os.remove(os.path.join(FORTUNE_DIR, FORTUNE_FILE))
         elif opt in ("-m", "--markdown"):
             type = "markdown"
+        elif opt == "-m":
+            FILE_NAME = arg
 
 
     clips = collections.defaultdict(dict)
