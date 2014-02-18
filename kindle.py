@@ -149,7 +149,7 @@ def checkdirectory():
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hfmi",["help","fortune","markdown"])
+        opts, args = getopt.getopt(argv, "hfmi:",["help","fortune","markdown"])
     except getopt.GetoptError:
         print("参数出错，-h查看参数使用")
         sys.exit(2)
@@ -163,11 +163,15 @@ def main(argv):
             sys.exit()
         elif opt in ("-f", "--fortune"):
             type = "fortune"
-            os.remove(os.path.join(FORTUNE_DIR, FORTUNE_FILE))
+            if os.path.exists(os.path.join(FORTUNE_DIR, FORTUNE_FILE)):
+                os.remove(os.path.join(FORTUNE_DIR, FORTUNE_FILE))
         elif opt in ("-m", "--markdown"):
             type = "markdown"
-        elif opt == "-m":
-            FILE_NAME = arg
+        elif opt == "-i":
+            if arg:
+                FILE_NAME = arg
+                print(FILE_NAME)
+            print(arg)
 
 
     clips = collections.defaultdict(dict)
