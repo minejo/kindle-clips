@@ -37,7 +37,7 @@ def get_note(high_section, note_section):
     clip = get_highlight(high_section)
     clip['note'] = note
     return clip
-    
+
 def get_clip(section):
     clip = {}
     lines = [l for l in section.split('\n') if l]
@@ -45,7 +45,7 @@ def get_clip(section):
     clip['position'] = position
     clip['book'] = lines[0]
     clip['content'] = lines[2]
-    
+
     return clip
 
 def get_type(section):
@@ -77,15 +77,17 @@ def export_txt(clips,type):
         lines = []
         for pos in sorted(clips[book]):
             lines.append(clips[book][pos])
-        
+
         if type == "markdown":
             filename = os.path.join(OUTPUT_DIR, "%s.md" % book)
+        elif type == "vimwiki":
+            filename = os.path.join(OUTPUT_DIR, "%s.wiki" % book)
         elif type == "common":
             filename = os.path.join(OUTPUT_DIR, "%s.txt" % book)
         elif type == "fortune":
             filename = os.path.join(FORTUNE_DIR, FORTUNE_FILE)
 
-        if type in ("markdown","common"):
+        if type in ("markdown","common","vimwiki"):
             with open(filename, 'w') as f:
                 f.write(''.join(lines))
         elif type == "fortune":
@@ -113,6 +115,8 @@ def get_note_format(clip,type):
     book = clip['book']
     if type == "markdown":
         format = ">" + highlight + "\nNote:**"+note +"**\n-At Kindle page:" + position + "\n\n--------------\n\n"
+    elif type == "vimwiki":
+        format = "    " + highlight + "\nNote:**"+note +"**\n-At Kindle page:" + position + "\n\n--------------\n\n"
     elif type == "fortune":
         format = highlight + "\nNote: " + note + "\n-" + book + "\n%\n"
     elif type == "common":
@@ -120,12 +124,14 @@ def get_note_format(clip,type):
     return format
 
 def get_highlight_format(clip,type):
-    """Highlight的表现样式，与markdown相结合""" 
+    """Highlight的表现样式，与markdown相结合"""
     position = clip['position']
     highlight = clip['content']
     book = clip['book']
     if type == "markdown":
         format = ">" + highlight + "\n-At Kindle page:" + position +"\n\n------------------\n\n"
+    elif type == "vimwiki":
+        format = "    " + highlight + "\n-At Kindle page:" + position +"\n\n------------------\n\n"
     elif type == "fortune":
         format = highlight + "\n-" + book + "\n%\n"
     elif type == "common":
@@ -136,6 +142,7 @@ def help():
     print("""welcome to use kindle-clips.
        -m --markdown 导出markdown格式的书摘
        -f --fortune  导出fortune格式的书摘
+       -w --vimwiki  导出vimwiki笔记格式的书摘
        -i file 从制定文件导入书摘
        默认导出txt文本格式。""")
     return
@@ -146,11 +153,11 @@ def checkdirectory():
 
     if not os.path.exists(OUTPUT_DIR):
         os.mkdir(OUTPUT_DIR)
-    return 
+    return
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(argv, "hfmi:",["help","fortune","markdown"])
+        opts, args = getopt.getopt(argv, "hfmwi:",["help","fortune","markdown","vimwiki"])
     except getopt.GetoptError:
         print("参数出错，-h查看参数使用")
         sys.exit(2)
@@ -168,6 +175,8 @@ def main(argv):
                 os.remove(os.path.join(FORTUNE_DIR, FORTUNE_FILE))
         elif opt in ("-m", "--markdown"):
             type = "markdown"
+        elif opt in ("-w", "--vimwiki"):
+            type = "vimwiki"
         elif opt == "-i":
             if arg:
                 FILE_NAME = arg
