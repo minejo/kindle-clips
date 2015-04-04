@@ -48,6 +48,11 @@ def get_clip(section):
 
     return clip
 
+def resquare(name):
+    name = name.replace('[','(')
+    name = name.replace(']',')')
+    return name
+
 def get_type(section):
     """设BookMark为0，Highlight为1，Note为2, ClipAritle为3"""
     lines = [l for l in section.split('\n') if l]
@@ -86,6 +91,8 @@ def export_txt(clips,type):
             filename = os.path.join(OUTPUT_DIR, "%s.txt" % book)
         elif type == "fortune":
             filename = os.path.join(FORTUNE_DIR, FORTUNE_FILE)
+
+        filename = resquare(filename)
 
         if type in ("markdown","common","vimwiki"):
             with open(filename, 'w') as f:
